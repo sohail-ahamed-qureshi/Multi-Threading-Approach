@@ -239,6 +239,59 @@ namespace EmployeePayRollService
         }
 
         /// <summary>
+        /// Ability to add multiple Employees to database, returns true on successful insertion.
+        /// </summary>
+        /// <param name="employeeList">list of employees</param>
+        /// <returns></returns>
+        public bool AddData(List<Employee> employeeList)
+        {
+            SqlConnection connection = new SqlConnection(connectionString);
+            try
+            {
+                if (employeeList.Count == 0)
+                {
+                    Console.WriteLine("Employee List is empty");
+                    return false;
+                }
+                int result = 0;
+                connection.Open();
+                using (connection)
+                {
+                    string spName = "dbo.SpAddEmployeeData";
+                    foreach (Employee employee in employeeList)
+                    {
+                        SqlCommand command = new SqlCommand(spName, connection);
+                        command.CommandType = System.Data.CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@EmployeeName", employee.EmployeeName);
+                        command.Parameters.AddWithValue("@StartingDate", employee.StartingDate);
+                        command.Parameters.AddWithValue("@Gender", employee.Gender);
+                        command.Parameters.AddWithValue("@Department", employee.Department);
+                        command.Parameters.AddWithValue("@PhoneNumber", employee.PhoneNumber);
+                        command.Parameters.AddWithValue("@Basic_Pay", employee.BasicPay);
+                        command.Parameters.AddWithValue("@Address", employee.Address);
+                        command.Parameters.AddWithValue("@Deductions", employee.Deductions);
+                        command.Parameters.AddWithValue("@Taxable_Pay", employee.TaxablePay);
+                        command.Parameters.AddWithValue("@Tax", employee.Tax);
+                        command.Parameters.AddWithValue("@Net_Pay", employee.NetPay);
+                        result = command.ExecuteNonQuery();
+                    }
+                }
+                if (result != 0)
+                    return true;
+                return false;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+            finally
+            {
+                connection.Close();
+            }
+        }
+
+
+        /// <summary>
         /// retrieve salary of a employee from database.
         /// </summary>
         /// <param name="name">name of the employee</param>
